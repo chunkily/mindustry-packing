@@ -2,6 +2,8 @@ from collections import deque
 from copy import deepcopy
 from datetime import datetime as dt
 
+import numpy as np
+
 EMPTY = 0
 ORE = 1
 EXIT = 2
@@ -11,7 +13,7 @@ MINER_TR = 5
 MINER_BL = 6
 MINER_BR = 7
 
-TILE_TO_CODE = {
+CHAR_TO_TILE = {
     ".": EMPTY,
     "#": ORE,
     "E": EXIT,
@@ -23,7 +25,17 @@ TILE_TO_CODE = {
 }
 
 # Invert the dictionary
-CODE_TO_TILE = {v: k for k, v in TILE_TO_CODE.items()}
+TILE_TO_CHAR = {v: k for k, v in CHAR_TO_TILE.items()}
+
+MINER_ARR = np.array([[MINER_TL, MINER_TR], [MINER_BL, MINER_BR]])
+
+# Adjacent index modifiers
+# .12.
+# 8┌┐3
+# 7└┘4
+# .65.
+MINER_ADJ_IND_Y = np.array([-1, -1, 0, 1, 2, 2, 1, 0])
+MINER_ADJ_IND_X = np.array([0, 1, 2, 2, 1, 0, -1, -1])
 
 
 class board:
@@ -36,19 +48,21 @@ class board:
         self.exit = exit_
 
     def __repr__(self):
-        lines = ["".join([CODE_TO_TILE[x] for x in line]) for line in self.tiles]
-
+        lines = (
+            "".join([TILE_TO_CHAR[self.tiles[y, x]] for x in range(0, self.width)])
+            for y in range(0, self.height)
+        )
         return "\n".join(lines)
 
     def __hash__(self):
         return hash(repr(self))
 
     def __eq__(self, other):
-        return self.tiles == other.tiles
+        return np.array_equal(self.tiles, other.tiles)
 
     def check_path(self):
         """Returns True if all miners have a direct path to the exit, False otherwise."""
-        tiles = deepcopy(self.tiles)
+        tiles = self.tiles.copy()
 
         # Flood fill exit tile
         q = deque()
@@ -56,38 +70,29 @@ class board:
         while q:
             x, y = q.pop()
             if x > 0:
-                if tiles[y][x - 1] <= ORE:  # Either EMPTY or ORE
-                    tiles[y][x - 1] = EXIT
+                if tiles[y, x - 1] <= ORE:  # Either EMPTY or ORE
+                    tiles[y, x - 1] = EXIT
                     q.append((x - 1, y))
             if x < self.width - 1:
-                if tiles[y][x + 1] <= ORE:
-                    tiles[y][x + 1] = EXIT
+                if tiles[y, x + 1] <= ORE:
+                    tiles[y, x + 1] = EXIT
                     q.append((x + 1, y))
             if y > 0:
-                if tiles[y - 1][x] <= ORE:
-                    tiles[y - 1][x] = EXIT
+                if tiles[y - 1, x] <= ORE:
+                    tiles[y - 1, x] = EXIT
                     q.append((x, y - 1))
             if y < self.height - 1:
-                if tiles[y + 1][x] <= ORE:
-                    tiles[y + 1][x] = EXIT
+                if tiles[y + 1, x] <= ORE:
+                    tiles[y + 1, x] = EXIT
                     q.append((x, y + 1))
 
         # Check that each miner has an adjacent exit
         for x, y in self.miners:
-            # .12.
-            # 8┌┐3
-            # 7└┘4
-            # .65.
-            e1 = tiles[y - 1][x + 0] == EXIT
-            e2 = tiles[y - 1][x + 1] == EXIT
-            e3 = tiles[y + 0][x + 2] == EXIT
-            e4 = tiles[y + 1][x + 2] == EXIT
-            e5 = tiles[y + 2][x + 1] == EXIT
-            e6 = tiles[y + 2][x + 0] == EXIT
-            e7 = tiles[y + 1][x - 1] == EXIT
-            e8 = tiles[y + 0][x - 1] == EXIT
+            iy = MINER_ADJ_IND_Y + y
+            ix = MINER_ADJ_IND_X + x
+
             # if this miner does not have an adjacent exit, return False
-            if not (e1 or e2 or e3 or e4 or e5 or e6 or e7 or e8):
+            if not np.any(tiles[iy, ix] == EXIT):
                 return False
 
         return True
@@ -100,36 +105,24 @@ class board:
         tiles = self.tiles
         score = self.score
 
-        miner_score = 0
+        miner_section = tiles[y : y + 2, x : x + 2]
 
-        tl = tiles[y + 0][x + 0]
-        tr = tiles[y + 0][x + 1]
-        bl = tiles[y + 1][x + 0]
-        br = tiles[y + 1][x + 1]
+        is_ore = miner_section == ORE
+        is_empty = miner_section == EMPTY
 
-        tl_free = tl <= ORE  # Either EMPTY or ORE
-        tr_free = tr <= ORE
-        bl_free = bl <= ORE
-        br_free = br <= ORE
-
-        if tl_free and tr_free and bl_free and br_free:
-            miner_score += tl == ORE
-            miner_score += tr == ORE
-            miner_score += bl == ORE
-            miner_score += br == ORE
-
-            tiles = deepcopy(self.tiles)
-            miners = deepcopy(self.miners)
-            tiles[y + 0][x + 0] = MINER_TL
-            tiles[y + 1][x + 0] = MINER_BL
-            tiles[y + 0][x + 1] = MINER_TR
-            tiles[y + 1][x + 1] = MINER_BR
-        else:
+        if not np.all(is_ore | is_empty):
             return None
 
-        miner = (x, y)
+        miner_score = np.sum(is_ore)
 
+        tiles = tiles.copy()
+        miners = self.miners.copy()
+
+        tiles[y : y + 2, x : x + 2] = MINER_ARR
+
+        miner = (x, y)
         miners.append(miner)
+
         score += miner_score
         return board(tiles, self.height, self.width, miners, score, self.exit)
 
@@ -141,18 +134,16 @@ def main(lines):
     exit_coords = None
     ores = []
 
-    tiles = []
-    for y, line in enumerate(lines):
-        t_line = []
-        for x, tile in enumerate(line.strip()):
-            code = TILE_TO_CODE[tile]
-            t_line.append(code)
-            if code == ORE:
-                ores.append((x, y))
-            elif code == EXIT:
-                exit_coords = (x, y)
+    tiles = np.zeros((height, width), dtype="int")
 
-        tiles.append(t_line)
+    for y, line in enumerate(lines):
+        for x, char in enumerate(line.strip()):
+            tile = CHAR_TO_TILE[char]
+            tiles[y, x] = tile
+            if tile == ORE:
+                ores.append((x, y))
+            elif tile == EXIT:
+                exit_coords = (x, y)
 
     if exit_coords is None:
         raise ValueError("Input has no exit.")
