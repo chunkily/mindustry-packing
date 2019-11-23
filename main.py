@@ -47,12 +47,6 @@ class board:
     def __eq__(self, other):
         return self.tiles == other.tiles
 
-    def get_ore_coords(self):
-        for x in range(2, self.width - 3):
-            for y in range(2, self.height - 3):
-                if self.tiles[y][x] == ORE:
-                    yield x, y
-
     def check_path(self):
         """Returns True if all miners have a direct path to the exit, False otherwise."""
         tiles = deepcopy(self.tiles)
@@ -124,8 +118,6 @@ class board:
             miner_score += tr == ORE
             miner_score += bl == ORE
             miner_score += br == ORE
-            # if miner_score == 0:
-            #     return None
 
             tiles = deepcopy(self.tiles)
             miners = deepcopy(self.miners)
@@ -147,17 +139,20 @@ with open("input.txt") as f:
     lines = f.readlines()
 
 exit_coords = None
+ores = []
 
 tiles = []
 for y, line in enumerate(lines):
-    oline = []
+    t_line = []
     for x, tile in enumerate(line.strip()):
         code = tile_to_code[tile]
-        oline.append(code)
-        if code == EXIT:
+        t_line.append(code)
+        if code == ORE:
+            ores.append((x, y))
+        elif code == EXIT:
             exit_coords = (x, y)
 
-    tiles.append(oline)
+    tiles.append(t_line)
 
 if exit_coords is None:
     raise ValueError("Input has no exit.")
@@ -178,13 +173,15 @@ start_time = dt.now()
 
 while search:
     nxt = search.pop()
-    for ore_x, ore_y in nxt.get_ore_coords():
+    for ore_x, ore_y in ores:
         for x, y in [
             (ore_x + 0, ore_y + 0),
             (ore_x - 1, ore_y + 0),
             (ore_x + 0, ore_y - 1),
             (ore_x - 1, ore_y - 1),
         ]:
+            # if nxt.tiles[y][x] != ORE:
+            #     continue
             nxt_board = nxt.add_miner(x, y)
             if nxt_board is None or nxt_board in seen:
                 continue
