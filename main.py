@@ -63,6 +63,8 @@ class board:
     def check_path(self):
         """Returns True if all miners have a direct path to the exit, False otherwise."""
         tiles = self.tiles.copy()
+        x_max = self.width - 1
+        y_max = self.height - 1
 
         # Flood fill exit tile
         q = deque()
@@ -73,7 +75,7 @@ class board:
                 if tiles[y, x - 1] <= ORE:  # Either EMPTY or ORE
                     tiles[y, x - 1] = EXIT
                     q.append((x - 1, y))
-            if x < self.width - 1:
+            if x < x_max:
                 if tiles[y, x + 1] <= ORE:
                     tiles[y, x + 1] = EXIT
                     q.append((x + 1, y))
@@ -81,7 +83,7 @@ class board:
                 if tiles[y - 1, x] <= ORE:
                     tiles[y - 1, x] = EXIT
                     q.append((x, y - 1))
-            if y < self.height - 1:
+            if y < y_max:
                 if tiles[y + 1, x] <= ORE:
                     tiles[y + 1, x] = EXIT
                     q.append((x, y + 1))
