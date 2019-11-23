@@ -174,6 +174,8 @@ start_time = dt.now()
 while search:
     nxt = search.pop()
     for ore_x, ore_y in ores:
+        if nxt.tiles[ore_y][ore_x] != ORE:
+            continue
         for x, y in [
             (ore_x + 0, ore_y + 0),
             (ore_x - 1, ore_y + 0),
