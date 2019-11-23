@@ -174,8 +174,8 @@ start_time = dt.now()
 
 while search:
     nxt = search.pop()
-    for i in range(2, width - 3):
-        for j in range(2, height - 3):
+    for i in range(1, width - 2):
+        for j in range(1, height - 2):
             nxt_board = nxt.add_miner(i, j)
             if nxt_board is None or nxt_board in seen:
                 continue
