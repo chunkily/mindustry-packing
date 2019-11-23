@@ -65,19 +65,19 @@ class board:
         while q:
             x, y = q.pop()
             if x > 0:
-                if tiles[y][x - 1] in [EMPTY, ORE]:
+                if tiles[y][x - 1] <= ORE:  # Either EMPTY or ORE
                     tiles[y][x - 1] = EXIT
                     q.append((x - 1, y))
             if x < self.width - 1:
-                if tiles[y][x + 1] in [EMPTY, ORE]:
+                if tiles[y][x + 1] <= ORE:
                     tiles[y][x + 1] = EXIT
                     q.append((x + 1, y))
             if y > 0:
-                if tiles[y - 1][x] in [EMPTY, ORE]:
+                if tiles[y - 1][x] <= ORE:
                     tiles[y - 1][x] = EXIT
                     q.append((x, y - 1))
             if y < self.height - 1:
-                if tiles[y + 1][x] in [EMPTY, ORE]:
+                if tiles[y + 1][x] <= ORE:
                     tiles[y + 1][x] = EXIT
                     q.append((x, y + 1))
 
@@ -116,11 +116,10 @@ class board:
         bl = tiles[y + 1][x + 0]
         br = tiles[y + 1][x + 1]
 
-        free_tile_types = [EMPTY, ORE]
-        tl_free = tl in free_tile_types
-        tr_free = tr in free_tile_types
-        bl_free = bl in free_tile_types
-        br_free = br in free_tile_types
+        tl_free = tl <= ORE  # Either EMPTY or ORE
+        tr_free = tr <= ORE
+        bl_free = bl <= ORE
+        br_free = br <= ORE
 
         if tl_free and tr_free and bl_free and br_free:
             miner_score += tl == ORE
