@@ -55,7 +55,8 @@ class board:
         return "\n".join(lines)
 
     def __hash__(self):
-        return hash(repr(self))
+        return hash(tuple(self.tiles.flat))
+        # return hash(repr(self))
 
     def __eq__(self, other):
         return np.array_equal(self.tiles, other.tiles)
