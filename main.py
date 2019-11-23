@@ -11,7 +11,7 @@ MINER_TR = 5
 MINER_BL = 6
 MINER_BR = 7
 
-tile_to_code = {
+TILE_TO_CODE = {
     ".": EMPTY,
     "#": ORE,
     "E": EXIT,
@@ -23,7 +23,7 @@ tile_to_code = {
 }
 
 # Invert the dictionary
-code_to_tile = {v: k for k, v in tile_to_code.items()}
+CODE_TO_TILE = {v: k for k, v in TILE_TO_CODE.items()}
 
 
 class board:
@@ -36,7 +36,7 @@ class board:
         self.exit = exit_
 
     def __repr__(self):
-        lines = ["".join([code_to_tile[x] for x in line]) for line in self.tiles]
+        lines = ["".join([CODE_TO_TILE[x] for x in line]) for line in self.tiles]
 
         return "\n".join(lines)
 
@@ -145,7 +145,7 @@ def main(lines):
     for y, line in enumerate(lines):
         t_line = []
         for x, tile in enumerate(line.strip()):
-            code = tile_to_code[tile]
+            code = TILE_TO_CODE[tile]
             t_line.append(code)
             if code == ORE:
                 ores.append((x, y))
