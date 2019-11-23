@@ -49,7 +49,14 @@ class board:
     def __eq__(self, other):
         return self.tiles == other.tiles
 
+    def get_ore_coords(self):
+        for x in range(2, self.width - 3):
+            for y in range(2, self.height - 3):
+                if self.tiles[y][x] == ORE:
+                    yield x, y
+
     def check_path(self):
+        """Returns True if all miners have a direct path to the exit, False otherwise."""
         tiles = deepcopy(self.tiles)
 
         # Flood fill exit tile
@@ -120,8 +127,8 @@ class board:
             miner_score += tr == ORE
             miner_score += bl == ORE
             miner_score += br == ORE
-            if miner_score == 0:
-                return None
+            # if miner_score == 0:
+            #     return None
 
             tiles = deepcopy(self.tiles)
             miners = deepcopy(self.miners)
@@ -174,9 +181,14 @@ start_time = dt.now()
 
 while search:
     nxt = search.pop()
-    for i in range(1, width - 2):
-        for j in range(1, height - 2):
-            nxt_board = nxt.add_miner(i, j)
+    for ore_x, ore_y in nxt.get_ore_coords():
+        for x, y in [
+            (ore_x + 0, ore_y + 0),
+            (ore_x - 1, ore_y + 0),
+            (ore_x + 0, ore_y - 1),
+            (ore_x - 1, ore_y - 1),
+        ]:
+            nxt_board = nxt.add_miner(x, y)
             if nxt_board is None or nxt_board in seen:
                 continue
             seen.add(nxt_board)
@@ -190,7 +202,7 @@ while search:
                     highest_score_miners = num_miners
                     print(f"patches covered:{score}, number of miners:{num_miners}")
                     print(nxt_board)
-                elif score == highest_score and num_miners < highest_score_miners:
+                elif score == highest_score and num_miners <= highest_score_miners:
                     highest_score_miners = num_miners
                     print(f"patches covered:{score}, number of miners:{num_miners}")
                     print(nxt_board)

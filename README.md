@@ -6,6 +6,8 @@ Paths can only go in the 4 cardinal directions.
 
 ## Sample input
 
+Note that current algorithm requires an exit tile and no miners can be placed on the edges 2 tiles in so you need to insert the filler tiles yourself.
+
 ``` text
 E.........
 ..........
