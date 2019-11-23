@@ -157,10 +157,7 @@ def main(lines):
 
     while search:
         nxt = search.pop()
-        gen = (
-            (ore_x, ore_y) for ore_x, ore_y in ores if nxt.tiles[ore_y][ore_x] == ORE
-        )
-        for ore_x, ore_y in gen:
+        for ore_y, ore_x in zip(*np.nonzero(nxt.tiles == ORE)):
             for x, y in [
                 (ore_x - 1, ore_y - 1),
                 (ore_x + 0, ore_y - 1),
