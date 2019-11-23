@@ -98,8 +98,7 @@ class board:
         
         If invalid returns None instead.
         """
-        tiles = deepcopy(self.tiles)
-        miners = deepcopy(self.miners)
+        tiles = self.tiles
         score = self.score
 
         miner_score = 0
@@ -109,10 +108,11 @@ class board:
         bl = tiles[y + 1][x + 0]
         br = tiles[y + 1][x + 1]
 
-        tl_free = tl in [EMPTY, ORE, EXIT]
-        tr_free = tr in [EMPTY, ORE, EXIT]
-        bl_free = bl in [EMPTY, ORE, EXIT]
-        br_free = br in [EMPTY, ORE, EXIT]
+        free_tile_types = [EMPTY, ORE, EXIT]
+        tl_free = tl in free_tile_types
+        tr_free = tr in free_tile_types
+        bl_free = bl in free_tile_types
+        br_free = br in free_tile_types
 
         if tl_free and tr_free and bl_free and br_free:
             miner_score += tl == ORE
@@ -122,6 +122,8 @@ class board:
             if miner_score == 0:
                 return None
 
+            tiles = deepcopy(self.tiles)
+            miners = deepcopy(self.miners)
             tiles[y + 0][x + 0] = MINER_TL
             tiles[y + 1][x + 0] = MINER_BL
             tiles[y + 0][x + 1] = MINER_TR
@@ -183,9 +185,9 @@ while search:
                 if score > highest_score:
                     highest_score = score
                     highest_score_miners = num_miners
-                    print(score, num_miners)
+                    print(f"patches covered: {score}, number of miners:{num_miners}")
                     print(nxt_board)
                 elif score == highest_score and num_miners < highest_score_miners:
                     highest_score_miners = num_miners
-                    print(score, num_miners)
+                    print(f"patches covered: {score}, number of miners:{num_miners}")
                     print(nxt_board)
