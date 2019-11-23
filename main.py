@@ -56,7 +56,6 @@ class board:
 
     def __hash__(self):
         return hash(tuple(self.tiles.flat))
-        # return hash(repr(self))
 
     def __eq__(self, other):
         return np.array_equal(self.tiles, other.tiles)
@@ -92,8 +91,8 @@ class board:
             iy = MINER_ADJ_IND_Y + y
             ix = MINER_ADJ_IND_X + x
 
-            # if this miner does not have an adjacent exit, return False
             if not np.any(tiles[iy, ix] == EXIT):
+                # if this miner does not have an adjacent exit, return False
                 return False
 
         return True
@@ -103,10 +102,7 @@ class board:
         
         If invalid returns None instead.
         """
-        tiles = self.tiles
-        score = self.score
-
-        miner_section = tiles[y : y + 2, x : x + 2]
+        miner_section = self.tiles[y : y + 2, x : x + 2]
 
         is_ore = miner_section == ORE
         is_empty = miner_section == EMPTY
@@ -114,17 +110,14 @@ class board:
         if not np.all(is_ore | is_empty):
             return None
 
-        miner_score = np.sum(is_ore)
-
-        tiles = tiles.copy()
-        miners = self.miners.copy()
-
+        tiles = self.tiles.copy()
         tiles[y : y + 2, x : x + 2] = MINER_ARR
 
-        miner = (x, y)
-        miners.append(miner)
+        miners = self.miners.copy()
+        miners.append((x, y))
 
-        score += miner_score
+        score = self.score + np.sum(is_ore)
+
         return board(tiles, self.height, self.width, miners, score, self.exit)
 
 
