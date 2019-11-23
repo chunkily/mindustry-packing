@@ -173,17 +173,14 @@ start_time = dt.now()
 
 while search:
     nxt = search.pop()
-    for ore_x, ore_y in ores:
-        if nxt.tiles[ore_y][ore_x] != ORE:
-            continue
+    gen = ((ore_x, ore_y) for ore_x, ore_y in ores if nxt.tiles[ore_y][ore_x] == ORE)
+    for ore_x, ore_y in gen:
         for x, y in [
-            (ore_x + 0, ore_y + 0),
-            (ore_x - 1, ore_y + 0),
-            (ore_x + 0, ore_y - 1),
             (ore_x - 1, ore_y - 1),
+            (ore_x + 0, ore_y - 1),
+            (ore_x - 1, ore_y + 0),
+            (ore_x + 0, ore_y + 0),
         ]:
-            # if nxt.tiles[y][x] != ORE:
-            #     continue
             nxt_board = nxt.add_miner(x, y)
             if nxt_board is None or nxt_board in seen:
                 continue
