@@ -116,7 +116,7 @@ class board:
         bl = tiles[y + 1][x + 0]
         br = tiles[y + 1][x + 1]
 
-        free_tile_types = [EMPTY, ORE, EXIT]
+        free_tile_types = [EMPTY, ORE]
         tl_free = tl in free_tile_types
         tr_free = tr in free_tile_types
         bl_free = bl in free_tile_types
