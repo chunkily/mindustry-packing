@@ -1,5 +1,6 @@
 from copy import deepcopy
 from collections import deque
+from datetime import datetime as dt
 
 
 EMPTY = 0
@@ -169,6 +170,8 @@ highest_score_miners = 0
 search = deque()
 search.append(b)
 
+start_time = dt.now()
+
 while search:
     nxt = search.pop()
     for i in range(2, width - 3):
@@ -191,3 +194,6 @@ while search:
                     highest_score_miners = num_miners
                     print(f"patches covered:{score}, number of miners:{num_miners}")
                     print(nxt_board)
+
+duration = dt.now() - start_time
+print(f"Took {duration} to finish.")
