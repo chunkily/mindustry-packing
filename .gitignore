@@ -133,3 +133,4 @@ dmypy.json
 
 # input
 *.txt
+!requirements.txt
