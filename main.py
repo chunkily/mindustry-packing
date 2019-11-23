@@ -75,10 +75,10 @@ class board:
 
         # Check that each miner has an adjacent exit
         for x, y in self.miners:
-            #             #12#
-            #             8MM3
-            #             7MM4
-            #             #65#
+            # .12.
+            # 8┌┐3
+            # 7└┘4
+            # .65.
             e1 = tiles[y - 1][x + 0] == EXIT
             e2 = tiles[y - 1][x + 1] == EXIT
             e3 = tiles[y + 0][x + 2] == EXIT
@@ -185,9 +185,9 @@ while search:
                 if score > highest_score:
                     highest_score = score
                     highest_score_miners = num_miners
-                    print(f"patches covered: {score}, number of miners:{num_miners}")
+                    print(f"patches covered:{score}, number of miners:{num_miners}")
                     print(nxt_board)
                 elif score == highest_score and num_miners < highest_score_miners:
                     highest_score_miners = num_miners
-                    print(f"patches covered: {score}, number of miners:{num_miners}")
+                    print(f"patches covered:{score}, number of miners:{num_miners}")
                     print(nxt_board)
