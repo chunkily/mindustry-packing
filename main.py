@@ -37,9 +37,7 @@ class board:
         self.exit = exit_
 
     def __repr__(self):
-        lines = []
-        for l in self.tiles:
-            lines.append("".join([code_to_tile[x] for x in l]))
+        lines = ["".join([code_to_tile[x] for x in line]) for line in self.tiles]
 
         return "\n".join(lines)
 
