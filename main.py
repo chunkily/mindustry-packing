@@ -1,7 +1,6 @@
-from copy import deepcopy
 from collections import deque
+from copy import deepcopy
 from datetime import datetime as dt
-
 
 EMPTY = 0
 ORE = 1
@@ -135,70 +134,76 @@ class board:
         return board(tiles, self.height, self.width, miners, score, self.exit)
 
 
-with open("input.txt") as f:
-    lines = f.readlines()
+def main(lines):
+    height = len(lines)
+    width = len(lines[0].strip())
 
-exit_coords = None
-ores = []
+    exit_coords = None
+    ores = []
 
-tiles = []
-for y, line in enumerate(lines):
-    t_line = []
-    for x, tile in enumerate(line.strip()):
-        code = tile_to_code[tile]
-        t_line.append(code)
-        if code == ORE:
-            ores.append((x, y))
-        elif code == EXIT:
-            exit_coords = (x, y)
+    tiles = []
+    for y, line in enumerate(lines):
+        t_line = []
+        for x, tile in enumerate(line.strip()):
+            code = tile_to_code[tile]
+            t_line.append(code)
+            if code == ORE:
+                ores.append((x, y))
+            elif code == EXIT:
+                exit_coords = (x, y)
 
-    tiles.append(t_line)
+        tiles.append(t_line)
 
-if exit_coords is None:
-    raise ValueError("Input has no exit.")
+    if exit_coords is None:
+        raise ValueError("Input has no exit.")
 
-height = len(tiles)
-width = len(tiles[0])
+    b = board(tiles, height, width, [], 0, exit_coords)
 
-b = board(tiles, height, width, [], 0, exit_coords)
+    seen = set()
+    highest_score = 0
+    highest_score_miners = 0
 
-seen = set()
-highest_score = 0
-highest_score_miners = 0
+    search = deque()
+    search.append(b)
 
-search = deque()
-search.append(b)
+    start_time = dt.now()
 
-start_time = dt.now()
+    while search:
+        nxt = search.pop()
+        gen = (
+            (ore_x, ore_y) for ore_x, ore_y in ores if nxt.tiles[ore_y][ore_x] == ORE
+        )
+        for ore_x, ore_y in gen:
+            for x, y in [
+                (ore_x - 1, ore_y - 1),
+                (ore_x + 0, ore_y - 1),
+                (ore_x - 1, ore_y + 0),
+                (ore_x + 0, ore_y + 0),
+            ]:
+                nxt_board = nxt.add_miner(x, y)
+                if nxt_board is None or nxt_board in seen:
+                    continue
+                seen.add(nxt_board)
+                if nxt_board.check_path():
+                    search.append(nxt_board)
+                    num_miners = len(nxt_board.miners)
+                    score = nxt_board.score
 
-while search:
-    nxt = search.pop()
-    gen = ((ore_x, ore_y) for ore_x, ore_y in ores if nxt.tiles[ore_y][ore_x] == ORE)
-    for ore_x, ore_y in gen:
-        for x, y in [
-            (ore_x - 1, ore_y - 1),
-            (ore_x + 0, ore_y - 1),
-            (ore_x - 1, ore_y + 0),
-            (ore_x + 0, ore_y + 0),
-        ]:
-            nxt_board = nxt.add_miner(x, y)
-            if nxt_board is None or nxt_board in seen:
-                continue
-            seen.add(nxt_board)
-            if nxt_board.check_path():
-                search.append(nxt_board)
-                num_miners = len(nxt_board.miners)
-                score = nxt_board.score
+                    if score > highest_score:
+                        highest_score = score
+                        highest_score_miners = num_miners
+                        print(f"patches covered:{score}, number of miners:{num_miners}")
+                        print(nxt_board)
+                    elif score == highest_score and num_miners <= highest_score_miners:
+                        highest_score_miners = num_miners
+                        print(f"patches covered:{score}, number of miners:{num_miners}")
+                        print(nxt_board)
 
-                if score > highest_score:
-                    highest_score = score
-                    highest_score_miners = num_miners
-                    print(f"patches covered:{score}, number of miners:{num_miners}")
-                    print(nxt_board)
-                elif score == highest_score and num_miners <= highest_score_miners:
-                    highest_score_miners = num_miners
-                    print(f"patches covered:{score}, number of miners:{num_miners}")
-                    print(nxt_board)
+    duration = dt.now() - start_time
+    print(f"Took {duration} to finish.")
 
-duration = dt.now() - start_time
-print(f"Took {duration} to finish.")
+
+if __name__ == "__main__":
+    with open("input.txt") as f:
+        lines = f.readlines()
+    main(lines)
