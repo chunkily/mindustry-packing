@@ -128,7 +128,6 @@ def main(lines):
     width = len(lines[0].strip())
 
     exit_coords = None
-    ores = []
 
     tiles = np.zeros((height, width), dtype="int")
 
@@ -136,9 +135,7 @@ def main(lines):
         for x, char in enumerate(line.strip()):
             tile = CHAR_TO_TILE[char]
             tiles[y, x] = tile
-            if tile == ORE:
-                ores.append((x, y))
-            elif tile == EXIT:
+            if tile == EXIT:
                 exit_coords = (x, y)
 
     if exit_coords is None:
